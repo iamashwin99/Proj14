@@ -15,7 +15,7 @@ Code
 - [ ] Update welcome screen and other display aspects
 - [ ] remove code for servo
 - [ ] add solenoid control (see next item)
-- [ ] ULN2003A is needed modified pins are as follows: PB0 for solenoid lock(active high) PA5 for buzzer(active low and no need to change code for it)
+- [ ] ULN2003A is needed modified pins are as follows: PB1 for solenoid lock(active high) PA5 for buzzer(active low and no need to change code for it)
 
 
 
