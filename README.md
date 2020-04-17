@@ -7,15 +7,15 @@ Design
 
 - [x] Add solenoid (added solenoid control to PinPC7 of IC U2 (8255A))
 - [x] Make Design file clutter free (More reorganisation needed)
-- [ ] Redo Mem Interfacing
+- [x] Redo Mem Interfacing (not required)
 - [ ] Redo 8253 interrupts
 
 Code
 
 - [ ] Update welcome screen and other display aspects
 - [ ] remove code for servo
-- [ ] add solenoid control to 
-- [ ] Check if ULN2003A is needed now If not remove from design
+- [ ] add solenoid control (see next item)
+- [ ] ULN2003A is needed modified pins are as follows: PB0 for solenoid lock(active high) PA5 for buzzer(active low and no need to change code for it)
 
 
 
@@ -24,5 +24,5 @@ Documentation
 - [ ] Make Flow chart of Algo in star UML or other software
 - [ ] Add a cad /image of door lock along with auto closing mechanism
 - [ ] parts list
-- [ ] mem interfacing
+- [ ] Mem interfacing
 - [ ] 
