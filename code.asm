@@ -1,4 +1,38 @@
-JMP st1
+#make_bin#
+
+; BIN is plain binary format similar to .com format, but not limited to 1 segment;
+; All values between # are directives, these values are saved into a separate .binf file.
+; Before loading .bin file emulator reads .binf file with the same file name.
+
+; All directives are optional, if you don't need them, delete them.
+
+; set loading address, .bin file will be loaded to this address:
+#LOAD_SEGMENT=FFFFh#
+#LOAD_OFFSET=0000h#
+
+; set entry point:
+#CS=0000h#	; same as loading segment
+#IP=0000h#	; same as loading offset
+
+; set segment registers
+#DS=0000h#	; same as loading segment
+#ES=0000h#	; same as loading segment
+
+; set stack
+#SS=0000h#	; same as loading segment
+#SP=FFFEh#	; set to top of loading segment
+
+; set general registers (optional)
+#AX=0000h#
+#BX=0000h#
+#CX=0000h#
+#DX=0000h#
+#SI=0000h#
+#DI=0000h#
+#BP=0000h#
+
+; add your code here
+           JMP st1
 db 5 dup(0)
 
 ;IVT entry for NMI (INT 02h)
@@ -13,23 +47,23 @@ DW 0000
 DB 508 dup(0)
 st1:	CLI
 
-;Initialise DS,ES,SS to start of RAM
-	MOV AX,0100h ;;;;;;;;;;;;;;;;;;;;;;
+;Initialising DS,ES,SS to start of RAM
+	MOV AX,0100h ;leaving some space empty
 	MOV DS,AX
 	MOV ES,AX
 	MOV SS,AX
 	MOV SP,0FFFEh
 	
-;Initialise 8255
+;Initialising 8255
 	STI
-	;8255-1
-	MOV AL,88h ;;;;;CHANGE THIS
+	;8255_1
+	MOV AL,88h		;PORT A,B,CLower give output	PORT CUpper takes Input
 	OUT 06h,AL 
-	;8255-2
-	MOV AL,88h ;;;;;CHANGE THIS IF REQUIRED
+	;8255_2
+	MOV AL,88h		;PORT A,B,CLower give output	PORT CUpper takes Input
 	OUT 0Eh,AL
 	
-;Initialise Timers
+;Initialising Timers
 	MOV AL,36h ;Control Word for 8253-1 C0
 	OUT 16h,AL
 	
@@ -39,46 +73,42 @@ st1:	CLI
 	MOV AL,94h ;Control Word for 8253-1 C2
 	OUT 16h,AL
 	
-	MOV AL,14h ;Control Word for 8253-2 C0
+	MOV AL,34h ;Control Word for 8253-2 C0
 	OUT 1Eh,AL
 	
-	MOV AL,54h ;Control Word for 8253-2 C1
+	MOV AL,5ah ;Control Word for 8253-2 C1
 	OUT 1Eh,AL
 	
 	MOV AL,94h ;Control Word for 8253-2 C2
 	OUT 1Eh,AL
 	
-	MOV AL,14h ;Control Word for 8253-3 C1
-	OUT 26h,AL
 	
-	MOV AL,0A8h ;Load count lsb for 8253-1 C0
+	MOV AL,050h ;Load count lsb for 8253-1 C0
 	OUT 10h,AL
 	
-	MOV AL,61h ;Load count msb for 8253-1 C0
+	MOV AL,0c3h ;Load count msb for 8253-1 C0
 	OUT 10h,AL
 	
 	MOV AL,64h ;Load count lsb for 8253-1 C1
 	OUT 12h,AL
 	
-	MOV AL,3Dh ;Load count lsb for 8253-1 C2 (1 Minute Timer)
+	MOV AL,1eh ;Load count lsb for 8253-1 C2 (1 Minute Timer)
 	OUT 14h,AL
 	
-	MOV AL,3Ch ;Load count lsb for 8253-2 C0 (1 Min counter for 24 hr generation)
+	MOV AL,40h ;Load count lsb for 8253-2 C0 (1 Min counter for 24 hr generation)
 	OUT 18h,AL
 	
-	MOV AL,3Ch ;load count for 8253-2 C1 (1 hr counter for 24 hr generation)
+	MOV AL,3h ;load count for 8253-2 C1 (1 hr counter for 24 hr generation)
 	OUT 1Ah,AL
 	
-	MOV AL,18h ;Load count lsb for 8253-2 C2
+	MOV AL,2h ;Load count lsb for 8253-2 C2
 	OUT 1Ch,AL
 	
-	MOV AL,2h ;Load count lsb for 8253-3 C1
-	OUT 20h,AL
 	
 	MOV AL,00h ;default low output from 8255-2 upper port C
 	OUT 0Ch,AL
 	
-;LCD Initialisation
+;Initialising LCD
 	CALL DELAY_20ms
 	MOV AL,04h ;PB2 bit is 1 to make E on LCD 1
 	OUT 0Ah,AL ;;;;;;;;;;;;;
@@ -125,96 +155,94 @@ st1:	CLI
 	CALL DELAY_20ms
 ;End of LCD Initialisation
 
+;Setting default master password as 1234567890123456
 	mov si,0000h
-	mov al,0bdh ;hard coding pass-word
-				;9999999999999999
+	mov al,0EEh	;Hex code for 1
 	mov [si],al
-	mov al,0bdh
+	mov al,0EDh	;..2
 	mov [si+1],al
-	mov al,0bdh
+	mov al,0EBh	;..3
 	mov [si+2],al
-	mov al,0bdh
+	mov al,0DEh	;..4
 	mov [si+3],al
-	mov al,0bdh
+	mov al,0DDh	;..5
 	mov [si+4],al
-	mov al,0bdh
+	mov al,0DBh	;..6
 	mov [si+5],al
-	mov al,0bdh
+	mov al,0BEh	;..7
 	mov [si+6],al
-	mov al,0bdh
+	mov al,0BDh	;..8
 	mov [si+7],al
-	mov al,0bdh
+	mov al,0BBh	;..9
 	mov [si+8],al
-	mov al,0bdh
+	mov al,0B7h	;..0
 	mov [si+9],al	
-	mov al,0bdh
+	mov al,0EEh	;..1
 	mov [si+0ah],al
-	mov al,0bdh
+	mov al,0EDh	;..2
 	mov [si+0bh],al
-	mov al,0bdh
+	mov al,0EBh	;..3
 	mov [si+0ch],al
-	mov al,0bdh
+	mov al,0DEh	;..4
 	mov [si+0dh],al
-	mov al,0bdh
+	mov al,0DDh	;..5
 	mov [si+0eh],al
-	mov al,0bdh
+	mov al,0DBh	;..6
+
+;Setting default alarm password as 12345678901234
 	mov [si+0fh],al
-	
 	add si,000fh
 	inc si
-	mov al,0bdh ;hard coding alarm pass-word 
-				;99999999999999
+	mov al,0EEh	;Hex code for 1
 	mov [si],al
-	mov al,0bdh
+	mov al,0EDh	;..2
 	mov [si+1],al
-	mov al,0bdh
+	mov al,0EBh	;..3
 	mov [si+2],al
-	mov al,0bdh
+	mov al,0DEh	;..4
 	mov [si+3],al
-	mov al,0bdh
+	mov al,0DDh	;..5
 	mov [si+4],al
-	mov al,0bdh
+	mov al,0DBh	;..6
 	mov [si+5],al
-	mov al,0bdh
+	mov al,0BEh	;..7
 	mov [si+6],al
-	mov al,0bdh
+	mov al,0BDh	;..8
 	mov [si+7],al
-	mov al,0bdh
+	mov al,0BBh	;..9
 	mov [si+8],al
-	mov al,0bdh
-	mov [si+9],al
-	mov al,0bdh
+	mov al,0B7h	;..0
+	mov [si+9],al	
+	mov al,0EEh	;..1
 	mov [si+0ah],al
-	mov al,0bdh
+	mov al,0EDh	;..2
 	mov [si+0bh],al
-	mov al,0bdh
+	mov al,0EBh	;..3
 	mov [si+0ch],al
-	mov al,0bdh
+	mov al,0DEh	;..4
 	mov [si+0dh],al
 	add si,000dh
-
 	inc si
 
 	MOV AL,0FFh ;Initialise Port A of 8255-1
 	OUT 00h,AL;;;;;;;;;;;;;
 	
-start:	CALL clear_LCD
-		CALL Welcome_msg
-		
-		MOV BP,00h ;Initialise
+start:	CALL clear_displayLCD
+		CALL displayLCD_welcome
+		MOV BP,00h 	;Initialise
 		CALL keypad_input
 		CMP AL,7Eh
 		JZ master_mode
 		JMP start
 		
-x6:	CALL clear_LCD
-	CALL welcome_msg
+x6:	CALL clear_displayLCD
+	CALL displayLCD_welcome
 	CALL keypad_input
 	CMP AL,7Dh ;O key
 	JZ User_mode
 	JMP x6
 		
-master_mode:	CALL entm
+master_mode:	CALL entermaster
 				MOV BP,0ABCDh
 				CMP AX,0ABCDh 
 				JNZ x6
@@ -224,11 +252,11 @@ x8:	CALL keypad_input
 	JZ Alarm_mode
 	JNZ x8
 	
-Alarm_mode:	CALL enta
-			CMP DH,6h ;Alarm caused by wrong Master pwd
+Alarm_mode:	CALL enteralarm
+			CMP DH,6h ;Alarm due to wrong Master password
 			JZ start
 			
-			CMP DH,1h ;Alarm caused by wrong user pwd
+			CMP DH,1h ;Alarm due to wrong User password
 			JZ x6
 			JMP x70
 			
@@ -242,8 +270,8 @@ x70:	stop:	JMP stop
 
 		
 	
-	
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-------PROCEDURES--------;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;________________SUBROUTINES________________;
+
 	DELAY_20ms proc
 		MOV CH,5h
 		x4: NOP
@@ -256,13 +284,13 @@ x70:	stop:	JMP stop
 	DELAY_max proc
 		MOV CX,0FFFFh
 		x16:	NOP
-				NOP
-				DEC CX
-				JNZ x16
+			NOP
+			DEC CX
+			JNZ x16
 		RET
 	DELAY_max ENDP
 	
-	clear_LCD proc
+	clear_displayLCD proc
 		MOV AL,00h
 		OUT 0Ah,AL ;;;;;;;;;;;
 		
@@ -279,9 +307,9 @@ x70:	stop:	JMP stop
 		OUT 0Ah,AL ;;;;;;;;;;;
 		
 		RET
-	clear_LCD endp
+	clear_displayLCD endp
 		
-	welcome_msg proc 
+	displayLCD_welcome proc 
 		MOV AL,0A0h 
 		OUT 08h,AL ;;;;;;;;;;;;;;;
 		CALL DELAY_20ms 
@@ -355,9 +383,9 @@ x70:	stop:	JMP stop
 		OUT 0Ah,AL ;Prints E ;;;;;;;;;;;;;;;
 		
 		RET
-	welcome_msg ENDP
+	displayLCD_welcome ENDP
 	
-	updateday_msg proc
+	displayLCD_update proc
 		mov al,55h
 		out 08h,al
 		call DELAY_20ms
@@ -413,7 +441,7 @@ x70:	stop:	JMP stop
 		out 0Ah,al ;prints E
 		
 		RET
-	updateday_msg ENDP
+	displayLCD_update ENDP
 	
 	Print_* proc
 		MOV AL,2Ah
@@ -423,11 +451,11 @@ x70:	stop:	JMP stop
 		OUT 0Ah,AL 
 		CALL DELAY_20ms 
 		MOV AL,01h 
-		OUT 0Ah,AL ;Prints *;;;;;;;;;;;;;; 
+		OUT 0Ah,AL ;Prints * 
 		RET 
 	Print_* ENDP 
 	
-	error_msg proc
+	displayLCD_error proc
 		MOV AL,0A0h
 		OUT 08h,AL
 		CALL DELAY_20ms
@@ -503,7 +531,7 @@ x70:	stop:	JMP stop
 		OUT 0Ah,AL ;Print D
 		
 		RET
-	error_msg ENDP
+	displayLCD_error ENDP
 		
 	
 	clear_1digit_LCD proc ;Shift left -> print Space -> Shift Left
@@ -545,122 +573,111 @@ x70:	stop:	JMP stop
 	keypad_input proc ;AL will contain the key value
 	
 	x0:	MOV AL,00h ;Check for Key release
-		OUT 0Ch,AL ;;;;;;;;;;;;;;;;;
-	x1: IN AL,0Ch ;;;;;;;;;;;;;;;;
+		OUT 0Ch,AL
+	x1: 	IN AL,0Ch
 		AND AL,0F0h
 		CMP AL,0F0h
 		JNZ x1
 		CALL DELAY_20ms ;Debounce
 		
 		MOV AL,00h ;Check for Key press
-		OUT 0Ch,AL ;;;;;;;;;;;;;;;
-	x2:	IN AL,0Ch ;;;;;;;;;;;;;;
+		OUT 0Ch,AL
+	x2:	IN AL,0Ch
 		AND AL,0F0h
 		CMP AL,0F0h
 		JZ x2
 		CALL DELAY_20ms
 		
-		MOV AL,00h ;Check for Key press
-		OUT 0Ch,AL ;;;;;;;;;;;;;
-		IN AL,0Ch ;;;;;;;;;;;;;
+		MOV AL,00h ;Confirm Key press
+		OUT 0Ch,AL
+		IN AL,0Ch
 		AND AL,0F0h
 		CMP AL,0F0h
 		JZ x2
 		
-		MOV AL,0Eh ;Check for Key Press Column 1
+		MOV AL,0Eh ;Checking in Column 1
 		MOV BL,AL
-		OUT 0Ch,AL ;;;;;;;;;;;;;;;;;;;;;;;;
-		IN AL,0Ch ;;;;;;;;;;;;;;;;;;
+		OUT 0Ch,AL
+		IN AL,0Ch
 		AND AL,0F0h
 		CMP AL,0F0h
 		JNZ x3
-		MOV AL,0Dh ;Check for Key Press Column 2
+		MOV AL,0Dh ;Checking in Column 2
 		MOV BL,AL
-		OUT 0Ch,AL ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-		IN AL,0Ch ;;;;;;;;;;;;;;;;;;;;;;;
+		OUT 0Ch,AL
+		IN AL,0Ch
 		AND AL,0F0h
 		CMP AL,0F0h
 		JNZ x3
-		MOV AL,0Bh ;Check for Key Press Column 3
+		MOV AL,0Bh ;Checking in Column 3
 		MOV BL,AL
-		OUT 0Ch,AL ;;;;;;;;;;;;;;;;;;;;;;;;;
-		IN AL,0Ch ;;;;;;;;;;;;;;;;;;;;;
+		OUT 0Ch,AL
+		IN AL,0Ch
 		AND AL,0F0h
 		CMP AL,0F0h
 		JNZ x3
-		MOV AL,07h ;Check for Key Press Column 4
+		MOV AL,07h ;Checking in Column 4
 		MOV BL,AL
-		OUT 0Ch,AL ;;;;;;;;;;;;;;;;;;;;;;;;
-		IN AL,0Ch ;;;;;;;;;;;;;;;;;;;;;
+		OUT 0Ch,AL
+		IN AL,0Ch
 		AND AL,0F0h
 		CMP AL,0F0h
 		JZ x2
 	
-	x3: OR AL,BL
-	
+	x3:	OR AL,BL
 		RET
 	keypad_input ENDP
 	
 	close_door proc
 		MOV AL,83h
 		OUT 02h,AL
-	
 		CALL DELAY_max
-	
-;	x100:	IN AL,04h ;Input from Timer
-;			CMP AL,03h
-;			JNZ x100
-
 		MOV AL,00h
 		OUT 02h,AL
-	
 		RET
 	close_door ENDP
 	
 	open_door proc
-		CALL clear_LCD
+		CALL clear_displayLCD
 		MOV AL,8Ah
 		OUT 02h,AL
 		
 		CALL DELAY_20ms
 		
-	;	MOV AL,0Ah
-	;	OUT 02h,AL
-		
 	x31:	IN AL,04h ; Input from Timer
-			CMP AL,0F0h
-			JNZ x31
+		CMP AL,0F0h
+		JNZ x31
 			
 		CALL DELAY_20ms
 		CALL close_door
 		RET
 	open_door ENDP
 	
-	entm proc
-		CALL clear_LCD
+	entermaster proc
+		CALL clear_displayLCD
 		MOV AL,0FEh
 		OUT 00h,AL  ;Turn On Enter Pwd LED
 		MOV CX,16
 		
 	enter_16_bit:	CALL keypad_input
 					
-					CMP AL,0BBh
+					CMP AL,0E7h
 					JZ press_c
 					
-					CMP AL,0B7h
+					CMP AL,0D7h
 					JZ press_ac
 					
 					CMP AL,77h
 					JZ press_enter
 					
 					CMP AL,7Eh
-					JZ invalid_master ;Invalid key pressed like M,O,A
+					JZ invalid_master	;Invalid key M pressed
 					
 					CMP AL,7Dh
-					JZ invalid_master
+					JZ invalid_master	;Invalid key O pressed
 					
 					CMP AL,7Bh
-					JZ invalid_master
+					JZ invalid_master	;Invalid key A pressed
 					
 					MOV [SI],AL
 					CALL Print_*
@@ -670,31 +687,31 @@ x70:	stop:	JMP stop
 					JNZ enter_16_bit
 					
 	disp_enter_master:	CALL keypad_input
-						CMP AL,0BBh
+						CMP AL,0E7h
 						JZ press_c
 						
-						CMP AL,0B7h
+						CMP AL,0D7h
 						JZ press_ac
 						
 						CMP AL,77h
-						JZ press_enter;
+						JZ press_enter
 						
-						JMP disp_enter_master ;;;;;;;;;;;;;;;;;;
+						JMP disp_enter_master
 				
 	invalid_master:	NOP
-					JMP enter_16_bit
+				JMP enter_16_bit
 					
 	press_c:	CALL clear_1digit_LCD
 				DEC SI
 				INC CX
 				JMP enter_16_bit
 				
-	press_ac:	CALL clear_LCD
+	press_ac:	CALL clear_displayLCD
 				MOV CX,16
 				MOV SI,1Eh 
 				JMP enter_16_bit
 				
-	press_enter:	CALL clear_LCD
+	press_enter:	CALL clear_displayLCD
 					MOV AL,0FFh ;Turn Off all LEDs
 					OUT 00h,AL
 					CMP CX,0
@@ -709,14 +726,14 @@ x70:	stop:	JMP stop
 				CALL DELAY_max
 				CALL DELAY_max
 				
-				CALL clear_LCD
+				CALL clear_displayLCD
 				MOV CX,12
 				
 	enter_12_bit_m:	CALL keypad_input
-					CMP AL,0BBh
+					CMP AL,0E7h
 					JZ press_cday
 					
-					CMP AL,0B7h
+					CMP AL,0D7h
 					JZ press_acday
 					
 					CMP AL,7Eh
@@ -738,39 +755,39 @@ x70:	stop:	JMP stop
 					JNZ enter_12_bit_m
 					
 	disp_enter:	CALL keypad_input
-				CMP AL,0BBh
+				CMP AL,0E7h
 				JZ press_cday
 				
-				CMP AL,0B7h
+				CMP AL,0D7h
 				JZ press_acday
 				
 				CMP AL,77h
 				JZ press_enter_day
 				
-				JMP disp_enter ;;;;;;;;;;;;;;;;
+				JMP disp_enter
 				
 	invalid_day:	NOP
-					JMP enter_12_bit_m
+			JMP enter_12_bit_m
 					
 	press_cday:	CALL clear_1digit_LCD
 				DEC SI
 				INC CX
 				JMP enter_12_bit_m
 				
-	press_acday:	CALL clear_LCD
+	press_acday:	CALL clear_displayLCD
 					MOV CX,12
 					MOV SI,002Eh
 					JMP enter_12_bit_m
 					
-	press_enter_day:	CALL clear_LCD
+	press_enter_day:	CALL clear_displayLCD
 						MOV AL,0FFh
-						OUT 00h,AL ; Shut down all LEDs
+						OUT 00h,AL 	;Shut down all LEDs
 						
 						CMP CX,0
 						JNZ err_msg
 						
 						MOV AL,0Fbh
-						OUT 00h,AL ; Turn On Pwd Updated LED
+						OUT 00h,AL 	;Turns On Password Updated LED
 						
 						CALL DELAY_max
 						CALL DELAY_max
@@ -779,7 +796,7 @@ x70:	stop:	JMP stop
 						OUT 08h,AL
 						JZ end_69h
 						
-	err_msg:	CALL error_msg
+	err_msg:	CALL 	displayLCD_error
 				JMP day_pass
 				
 	cmp_pass:	CLD
@@ -790,7 +807,7 @@ x70:	stop:	JMP stop
 			x5:	MOV AL,[SI]
 				MOV BL,[DI]
 				DEC CX
-				JZ day_pass ; Master Pwd is Correct...Proceed to set new pwd
+				JZ day_pass 	;Correct Master Password  Set new day password
 				CMP AL,BL
 				JNZ raise_alarm
 				INC SI
@@ -804,9 +821,9 @@ x70:	stop:	JMP stop
 				
 	end_69h:	RET
 	
-	entm ENDP
+	entermaster ENDP
 				
-	enta proc
+	enteralarm proc
 		MOV AL,0Eh
 		OUT 00h,AL ;Glow Enter Pwd LED
 		
@@ -814,10 +831,10 @@ x70:	stop:	JMP stop
 		MOV SI,3Ah
 		
 	enter_14_bit:	CALL keypad_input
-					CMP AL,0BBh
+					CMP AL,0E7h
 					JZ press_c_alarm
 					
-					CMP AL,0B7h
+					CMP AL,0D7h
 					JZ press_ac_alarm
 					
 					CMP AL,7Eh
@@ -839,10 +856,10 @@ x70:	stop:	JMP stop
 					JNZ enter_14_bit
 		
 	disp_enter_alarm:	call keypad_input
-						CMP AL,0BBh
+						CMP AL,0E7h
 						JZ press_c_alarm
 						
-						CMP AL,0B7h
+						CMP AL,0D7h
 						JZ press_ac_alarm
 						
 						CMP AL,77h
@@ -856,12 +873,12 @@ x70:	stop:	JMP stop
 					INC CX
 					JMP enter_14_bit
 					
-	press_ac_alarm:	CALL clear_LCD
+	press_ac_alarm:	CALL clear_displayLCD
 					MOV CX,14
 					MOV SI,3Ah
 					JMP enter_14_bit
 					
-	press_enter_alarm:	CALL clear_LCD
+	press_enter_alarm:	CALL clear_displayLCD
 						MOV AL,0Fh
 						OUT 00h,AL ;Turn off LEDs
 						
@@ -883,10 +900,10 @@ x70:	stop:	JMP stop
 			
 	x56:	RET
 	
-	enta ENDP
+	enteralarm ENDP
 	
 	entu proc
-		CALL clear_LCD
+		CALL clear_displayLCD
 		MOV DL,1 ; For checking two inputs
 		
 		MOV AL,0FEh
@@ -896,10 +913,10 @@ x70:	stop:	JMP stop
 		MOV SI,48h
 		
 	enter_12_bit:	CALL keypad_input
-					CMP AL,0BBh
+					CMP AL,0E7h
 					JZ press_c_user
 					
-					CMP AL,0B7h
+					CMP AL,0D7h
 					JZ press_ac_user
 					
 					CMP AL,7Eh
@@ -921,10 +938,10 @@ x70:	stop:	JMP stop
 					JNZ enter_12_bit
 					
 	disp_enter_user:	CALL keypad_input
-						CMP AL,0BBh
+						CMP AL,0E7h
 						JZ press_c_user
 						
-						CMP AL,0B7h
+						CMP AL,0D7h
 						JZ press_ac_user
 						
 						CMP AL,77h
@@ -938,7 +955,7 @@ x70:	stop:	JMP stop
 					INC CX
 					JMP enter_12_bit
 					
-	press_ac_user:	CALL clear_LCD
+	press_ac_user:	CALL clear_displayLCD
 					MOV CX,12
 					MOV SI,48h
 					JMP enter_12_bit
@@ -958,7 +975,7 @@ x70:	stop:	JMP stop
 					JNZ wrong_pass
 					JZ open_door_user
 					
-	wrong_pass:	CALL clear_LCD
+	wrong_pass:	CALL clear_displayLCD
 				MOV SI,48h
 				MOV CX,12
 				CMP dl,0
@@ -970,10 +987,10 @@ x70:	stop:	JMP stop
 				JMP enter_12_bit
 				
 	raise_alarm_user:	MOV DH,0h
-						MOV AL,0Fh
-						OUT 00h,AL
-						MOV AX,0ABCDh
-						JMP end_70h
+				MOV AL,0Fh
+				OUT 00h,AL
+				MOV AX,0ABCDh
+				JMP end_70h
 				
 	open_door_user:	CALL open_door
 	
@@ -981,14 +998,14 @@ x70:	stop:	JMP stop
 	
 	entu ENDP
 		
-	Nmi_24hrtimer:	CALL clear_LCD
-					CALL clear_1digit_LCD
-					CALL updateday_msg
+	Nmi_24hrtimer:	CALL clear_displayLCD
+			CALL clear_1digit_LCD
+			CALL displayLCD_update
 					
-		startnmi:	CALL keypad_input
-					CMP AL,07Eh
-					JZ master_mode
-					JMP startnmi
+	startnmi:	CALL keypad_input
+			CMP AL,7Eh
+			JZ master_mode
+			JMP startnmi
 					
 	IRET
 	
@@ -997,16 +1014,8 @@ x70:	stop:	JMP stop
 					CMP BP,0ABCDh
 					JZ x6
 					JNZ start
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-	
-	
-	
+
+
+HLT           ; halt!
+
+
