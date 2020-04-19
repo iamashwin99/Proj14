@@ -60,7 +60,7 @@ st1:	CLI
 	MOV AL,88h		;PORT A,B,CLower give output	PORT CUpper takes Input
 	OUT 06h,AL 
 	;8255_2
-	MOV AL,88h		;PORT A,B,CLower give output	PORT CUpper takes Input
+	MOV AL,89h		;PORT A,B,CLower give output	PORT CUpper takes Input
 	OUT 0Eh,AL
 	
 ;Initialising Timers
